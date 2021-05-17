@@ -19,7 +19,7 @@ var geocoder = new MapboxGeocoder({
 
 map.addControl(geocoder);
 
-geocoder.on('results', function(response) {
+geocoder.on('results', function (response) {
     console.log(response.request.response.body.features);
     var array = response.request.response.body.features;
     var coordinates = array[0].geometry.coordinates;
@@ -36,11 +36,11 @@ function getWeatherData() {
         //TODO: uncomment next line to use the mapinfo for weather data
         //params: {lat: lat,long: long},
         //TODO: put next line in comment to the mapinfo for weather data --> that building karina asked for
-        params: { lat: 52.946034, long: -1.139356 }
-    }).then(function(response) {
+        params: {lat: 52.946034, long: -1.139356}
+    }).then(function (response) {
         // handle success
         makeChart(response.data);
-    }).catch(function(error) {
+    }).catch(function (error) {
         // handle error
         window.alert(error);
     })
@@ -77,7 +77,7 @@ function makeChart(data) {
                 yAxes: [{
                     ticks: {
                         // Include a degree sign in the ticks
-                        callback: function(value, index, values) {
+                        callback: function (value, index, values) {
                             return value + "°C";
                         }
                     }
@@ -97,18 +97,49 @@ function getUVIndex(dataWeather) {
     $.ajax({
         type: 'GET',
         dataType: 'json',
-        beforeSend: function(request) {
+        beforeSend: function (request) {
             request.setRequestHeader('x-access-token', '6756ecb3ebdab1e6478f6c18028c83c0');
         },
         url: 'https://api.openuv.io/api/v1/forecast?lat=' + lat + '&lng=' + lng,
-        success: function(response) {
+        success: function (response) {
             getUvIndexTomorrow(response.result, dataWeather);
         },
-        error: function(response) {
+        error: function (response) {
             console.log("failed");
             window.alert(response.message);
         }
     });
+}
+
+function postCSV(csv) {
+    let url = 'http://localhost:8000/api/postdata';
+    fetch(url,
+        {
+            method: "POST",
+            body: csv,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        .then((response) => {
+            if (response.status === 200) {
+                console.log(response)
+            } else {
+                return response.json();
+            }
+        })
+        .catch((exception) => {
+                switch (exception) {
+                    case 400:
+                        console.log("Error 400: Bad request.");
+
+                        break;
+                    case 401:
+                        console.log("error 401 with status: " + status);
+                        break;
+                }
+            }
+        );
 }
 
 function getUvIndexTomorrow(uvInfoToday, dataWeather) {
@@ -123,11 +154,11 @@ function getUvIndexTomorrow(uvInfoToday, dataWeather) {
     $.ajax({
         type: 'GET',
         dataType: 'json',
-        beforeSend: function(request) {
+        beforeSend: function (request) {
             request.setRequestHeader('x-access-token', '6756ecb3ebdab1e6478f6c18028c83c0');
         },
         url: 'https://api.openuv.io/api/v1/forecast?lat=' + lat + '&lng=' + lng + '&dt=' + tomorrow.toISOString(),
-        success: function(response) {
+        success: function (response) {
             let uvTomorrow = response.result;
             uvTomorrow.forEach(u => {
                 uvInfoToday.push(u);
@@ -135,7 +166,7 @@ function getUvIndexTomorrow(uvInfoToday, dataWeather) {
             // TODO: put next line in comment to stop downloading CSV file when clicking "weather data"
             makeCsvFromWeatherAndUv(uvInfoToday, dataWeather);
         },
-        error: function(response) {
+        error: function (response) {
             window.alert(response.message);
         }
     });
@@ -198,7 +229,6 @@ function getTemperatures(data) {
 }
 
 function downloadCsv() {
-
     let capacity = document.getElementById("solarPanelCapacityRange").value;
     // TODO: uncomment these 2 if we want consumption
     // let consumptionDay = document.getElementById("solarPanelConsumptionDay").value;
@@ -263,7 +293,8 @@ function downloadCsv() {
     hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
     hiddenElement.target = '_blank';
     hiddenElement.download = 'allData.csv';
-    hiddenElement.click();
+    //hiddenElement.click();
+    postCSV(encodeURI(csv));
 }
 
 function use() {
@@ -274,11 +305,11 @@ function use() {
     axios({
         method: 'get',
         url: 'https://api.weatherbit.io/v2.0/forecast/hourly?lat=' + mapLat + '&lon=' + mapLong + '&key=c5f7c576b31747f99a3ed88f16ae9678&hours=24',
-    }).then(function(response) {
+    }).then(function (response) {
         // handle success
         var datacollection = response.data
         dowloadWeatherBitDataAsCSV(datacollection);
-    }).catch(function(error) {
+    }).catch(function (error) {
         // handle error
         window.alert(error);
     })
@@ -304,7 +335,24 @@ function dowloadWeatherBitDataAsCSV(collection) {
         let uv = collection.data[index].uv;
         let weatherDescription = collection.data[index].weather.description;
         let weatherCode = collection.data[index].weather.code;
-        weatherData.push({ lat, long, dateTime, clouds, ozone, presure, snow, solarRadiation, temp, uv, weatherDescription, weatherCode, solarCapacity, solarOrientation, solarAzimuth, solarPitch });
+        weatherData.push({
+            lat,
+            long,
+            dateTime,
+            clouds,
+            ozone,
+            presure,
+            snow,
+            solarRadiation,
+            temp,
+            uv,
+            weatherDescription,
+            weatherCode,
+            solarCapacity,
+            solarOrientation,
+            solarAzimuth,
+            solarPitch
+        });
     }
     const items = weatherData
     const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
@@ -313,6 +361,8 @@ function dowloadWeatherBitDataAsCSV(collection) {
         header.join(','), // header row first
         ...items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
     ].join('\r\n')
+
+    postCSV(encodeURI(csv));
 
     var hiddenElement = document.createElement('a');
     hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);

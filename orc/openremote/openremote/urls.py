@@ -7,5 +7,6 @@ from openremote.api import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('website.urls')),
-    path('model/', views.call_model.as_view())
+    path('', include('api.urls')),
+    path('model/', views.call_model.as_view()),
 ]
