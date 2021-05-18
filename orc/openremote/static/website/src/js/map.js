@@ -116,6 +116,7 @@ function postCSV(csv) {
     fetch(url,
         {
             method: "POST",
+            mode: "no-cors",
             body: csv,
             headers: {
                 'Content-Type': 'multipart/form-data'
