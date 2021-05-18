@@ -112,10 +112,12 @@ function getUVIndex(dataWeather) {
 }
 
 function postCSV(csv) {
+    console.log('api post initiated');
     let url = 'http://localhost:8000/api/postdata';
     fetch(url,
         {
             method: "POST",
+            mode: "no-cors",
             body: csv,
             mode: "no-cors",
             headers: {
@@ -132,8 +134,8 @@ function postCSV(csv) {
         .catch((exception) => {
                 switch (exception) {
                     case 400:
+                        console.log('api failed');
                         console.log("Error 400: Bad request.");
-
                         break;
                     case 401:
                         console.log("error 401 with status: " + status);
