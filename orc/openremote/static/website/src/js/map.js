@@ -117,6 +117,7 @@ function postCSV(csv) {
         {
             method: "POST",
             body: csv,
+            mode: "no-cors",
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
