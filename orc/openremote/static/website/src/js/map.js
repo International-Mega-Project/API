@@ -222,7 +222,7 @@ function getTemperatures(data) {
     let arrayLabels = [];
     for (i = 0; i <= 8; i++) {
         arrayTemps.push(data.list[i].main.temp - 273.15);
-        let label = data.list[i].dt_txt
+        let label = data.list[i].dt_txt;
         arrayLabels.push(label.substr(label.length - 8, 5));
     }
     array = [arrayLabels, arrayTemps];
