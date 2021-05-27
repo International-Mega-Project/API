@@ -2,12 +2,11 @@ from django.shortcuts import render
 from .apps import ApiConfig
 
 # Create your views here.
-from django.http.response import Http404, HttpResponse
+from django.http.response import Http404, HttpResponse, JsonResponse
 
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
-
 
 
 @csrf_exempt
@@ -18,7 +17,10 @@ def get(request):
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     try:
-        return HttpResponse(json.dumps({"status": 200, "params": body}), content_type='application/json')
+        response = JsonResponse(
+            body, status=200
+        )
+        return response
     except IntegrityError:
         return HttpResponse(
             json.dumps({"status": 201, "message": "user already exists , please try different user name "}),
