@@ -36,7 +36,10 @@ function getWeatherData() {
         //TODO: uncomment next line to use the mapinfo for weather data
         //params: {lat: lat,long: long},
         //TODO: put next line in comment to the mapinfo for weather data --> that building karina asked for
-        params: {lat: 52.946034, long: -1.139356}
+        params: {
+            lat: 52.946034,
+            long: -1.139356
+        }
     }).then(function (response) {
         // handle success
         makeChart(response.data);
@@ -113,8 +116,7 @@ function getUVIndex(dataWeather) {
 
 function postCSV(csv) {
     let url = 'http://localhost:8000/api/postdata';
-    fetch(url,
-        {
+    fetch(url, {
             method: "POST",
             body: csv,
             mode: "no-cors",
@@ -130,17 +132,16 @@ function postCSV(csv) {
             }
         })
         .catch((exception) => {
-                switch (exception) {
-                    case 400:
-                        console.log("Error 400: Bad request.");
+            switch (exception) {
+                case 400:
+                    console.log("Error 400: Bad request.");
 
-                        break;
-                    case 401:
-                        console.log("error 401 with status: " + status);
-                        break;
-                }
+                    break;
+                case 401:
+                    console.log("error 401 with status: " + status);
+                    break;
             }
-        );
+        });
 }
 
 function getUvIndexTomorrow(uvInfoToday, dataWeather) {
