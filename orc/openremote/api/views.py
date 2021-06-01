@@ -23,9 +23,14 @@ sampleData = {
     "22:00": "2",
 }
 
+
+def filter(text):
+    text = text.replace('<', ' ').replace('>', '').replace('(', '').replace(')', '')
+
 @csrf_exempt
 def get(request):
     # hourly post's
+    filter(request)
     if request.method != 'POST':
         raise Http404
     body_unicode = request.body.decode('utf-8')
